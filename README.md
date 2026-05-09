@@ -1,4 +1,4 @@
-# 🔒 CryptoWave — Covert Audio Steganography Communication System
+# 🔒 Audio Steganography
 
 A real-time **covert communication platform** that hides secret text messages inside audio files and transmits them between devices over a local Wi-Fi network. The audio sounds completely normal to anyone listening — the hidden message is invisible and inaudible.
 
@@ -146,7 +146,7 @@ The receiver runs a daemon thread (`ReceiverServer`) that listens on port `9999`
 If the receiver can't receive connections, run this in **Command Prompt (Admin)**:
 
 ```powershell
-netsh advfirewall firewall add rule name="CryptoWave" protocol=TCP dir=in localport=9999 action=allow
+netsh advfirewall firewall add rule name="AudioSteganography" protocol=TCP dir=in localport=9999 action=allow
 ```
 
 ---

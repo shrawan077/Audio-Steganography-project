@@ -67,20 +67,23 @@ class FFTSteganography:
 
     def _text_to_bits(self, text):
         bits = []
-        for char in text:
-            bin_val = bin(ord(char))[2:].zfill(8)
+        for byte in text.encode('utf-8'):
+            bin_val = bin(byte)[2:].zfill(8)
             bits.extend([int(b) for b in bin_val])
         return bits
 
     def _bits_to_text(self, bits):
-        chars = []
+        byte_array = bytearray()
         for i in range(0, len(bits), 8):
-            byte = bits[i:i+8]
-            if len(byte) < 8:
+            byte_bits = bits[i:i+8]
+            if len(byte_bits) < 8:
                 break
-            char_code = int("".join(map(str, byte)), 2)
-            chars.append(chr(char_code))
-        return "".join(chars)
+            char_code = int("".join(map(str, byte_bits)), 2)
+            byte_array.append(char_code)
+        try:
+            return byte_array.decode('utf-8')
+        except UnicodeDecodeError:
+            return byte_array.decode('utf-8', errors='ignore')
 
     def embed(self, input_path, message, output_path):
         """

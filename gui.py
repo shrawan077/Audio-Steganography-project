@@ -1,5 +1,5 @@
 """
-gui.py — Covert Audio Steganography Communication System
+gui.py — Audio Steganography
 ----------------------------------------------------------
 4-screen PyQt5 application:
   1. Home       – title + navigation
@@ -33,6 +33,286 @@ from network import ReceiverServer, send_audio, get_local_ip
 from recorder import AsyncRecorder
 
 
+def get_style(width, height):
+    # Calculate scale factor based on a reference resolution (e.g., 900x700)
+    # Use the smaller of width/height scale to prevent massive fonts on ultrawide
+    scale = min(width / 900.0, height / 700.0)
+    scale = max(0.8, min(scale, 2.0))  # Clamp between 0.8x and 2.0x
+
+    base_fs = int(13 * scale)
+    card_title_fs = int(11 * scale)
+    app_title_fs = int(42 * scale)
+    app_subtitle_fs = int(15 * scale)
+    screen_title_fs = int(20 * scale)
+    nav_card_fs = int(15 * scale)
+    big_btn_fs = int(16 * scale)
+    extract_box_fs = int(14 * scale)
+    log_box_fs = int(12 * scale)
+
+    return f"""
+/* ─── Global ─────────────────────────────────────────────────────────────── */
+QMainWindow, QWidget {{
+    background-color: #0d1117;
+    color: #e6edf3;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: {base_fs}px;
+}}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+QFrame#Card {{
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 4px;
+}}
+
+QLabel#CardTitle {{
+    font-size: {card_title_fs}px;
+    font-weight: bold;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}}
+
+/* ─── App Title (Home) ───────────────────────────────────────────────────── */
+QLabel#AppTitle {{
+    font-size: {app_title_fs}px;
+    font-weight: 800;
+    color: #58a6ff;
+    margin-top: 20px;
+    margin-bottom: 4px;
+}}
+
+QLabel#AppSubtitle {{
+    font-size: {app_subtitle_fs}px;
+    color: #8b949e;
+    margin-bottom: 10px;
+}}
+
+QLabel#HintLabel {{
+    font-size: {base_fs}px;
+    color: #6e7681;
+    line-height: 1.6;
+}}
+
+QLabel#IpBadge {{
+    font-size: {base_fs}px;
+    color: #4ecca3;
+    background-color: #0d2b20;
+    border: 1px solid #4ecca3;
+    border-radius: 8px;
+    padding: 6px 18px;
+    margin: 6px;
+}}
+
+/* ─── Screen title ───────────────────────────────────────────────────────── */
+QLabel#ScreenTitle {{
+    font-size: {screen_title_fs}px;
+    font-weight: 700;
+    color: #e6edf3;
+}}
+
+QLabel#InfoLabel {{
+    color: #8b949e;
+    font-size: {base_fs}px;
+}}
+
+/* ─── Navigation cards ───────────────────────────────────────────────────── */
+QPushButton#NavCard {{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #1c2333, stop:1 #161b22);
+    border: 1px solid #30363d;
+    border-radius: 16px;
+    color: #e6edf3;
+    font-size: {nav_card_fs}px;
+    font-weight: 600;
+    padding: 20px;
+}}
+QPushButton#NavCard:hover {{
+    border-color: #58a6ff;
+    color: #58a6ff;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #1c2a42, stop:1 #1c2333);
+}}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+QPushButton {{
+    background-color: #21262d;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: {base_fs}px;
+    font-weight: 500;
+}}
+QPushButton:hover {{
+    background-color: #30363d;
+    border-color: #58a6ff;
+}}
+QPushButton:disabled {{
+    color: #484f58;
+    border-color: #21262d;
+    background-color: #161b22;
+}}
+
+QPushButton#ActionBtn {{
+    background-color: #1a7f64;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-weight: 600;
+}}
+QPushButton#ActionBtn:hover {{ background-color: #238a6f; }}
+
+QPushButton#SecondaryBtn {{
+    background-color: #21262d;
+    color: #58a6ff;
+    border: 1px solid #30363d;
+}}
+QPushButton#SecondaryBtn:hover {{ border-color: #58a6ff; }}
+
+QPushButton#BigActionBtn {{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #0d4a8a, stop:1 #1a7f64);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: {big_btn_fs}px;
+    font-weight: 700;
+    min-height: 44px;
+}}
+QPushButton#BigActionBtn:hover {{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1158a8, stop:1 #238a6f);
+}}
+QPushButton#BigActionBtn:disabled {{
+    background: #21262d;
+    color: #484f58;
+}}
+
+QPushButton#ListenBtn {{
+    background-color: #0d4a8a;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-weight: 600;
+}}
+QPushButton#ListenBtn:hover {{ background-color: #1158a8; }}
+QPushButton#ListenBtn:checked {{
+    background-color: #6e1f1f;
+}}
+QPushButton#ListenBtn:checked:hover {{ background-color: #8a2323; }}
+
+QPushButton#PlayBtn {{
+    background-color: #1a7f64;
+    color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    font-size: {big_btn_fs}px;
+    padding: 0;
+}}
+QPushButton#PlayBtn:hover {{ background-color: #238a6f; }}
+
+QPushButton#PlayBtnLg {{
+    background-color: #1a7f64;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-weight: 600;
+    font-size: {extract_box_fs}px;
+}}
+QPushButton#PlayBtnLg:hover {{ background-color: #238a6f; }}
+QPushButton#PlayBtnLg:disabled {{ background-color: #161b22; color: #484f58; }}
+
+QPushButton#BackBtn {{
+    background-color: transparent;
+    color: #8b949e;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    font-size: {card_title_fs}px;
+    padding: 5px 10px;
+}}
+QPushButton#BackBtn:hover {{
+    color: #e6edf3;
+    border-color: #8b949e;
+}}
+
+/* ─── Inputs ─────────────────────────────────────────────────────────────── */
+QLineEdit#InputField, QSpinBox {{
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: {base_fs}px;
+}}
+QLineEdit#InputField:focus, QSpinBox:focus {{
+    border-color: #58a6ff;
+}}
+
+QTextEdit {{
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: {base_fs}px;
+}}
+
+QTextEdit#LogBox {{
+    color: #8b949e;
+    font-size: {log_box_fs}px;
+    border: 1px solid #21262d;
+}}
+
+QTextEdit#ExtractBox {{
+    border: 1px solid #4ecca3;
+    color: #4ecca3;
+    font-size: {extract_box_fs}px;
+    font-weight: 500;
+}}
+
+/* ─── Progress bar ───────────────────────────────────────────────────────── */
+QProgressBar#RecBar {{
+    background-color: #21262d;
+    border: none;
+    border-radius: 4px;
+    height: 6px;
+}}
+QProgressBar#RecBar::chunk {{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #58a6ff, stop:1 #4ecca3);
+    border-radius: 4px;
+}}
+
+/* ─── Scrollbars ─────────────────────────────────────────────────────────── */
+QScrollBar:vertical {{
+    background: #0d1117;
+    width: 8px;
+    border-radius: 4px;
+}}
+QScrollBar::handle:vertical {{
+    background: #30363d;
+    border-radius: 4px;
+}}
+QScrollBar::handle:vertical:hover {{ background: #58a6ff; }}
+
+QLabel {{
+    color: #8b949e;
+}}
+"""
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Signal bridge: lets background threads post safely to the Qt GUI thread
 # ─────────────────────────────────────────────────────────────────────────────
@@ -41,6 +321,7 @@ class Bridge(QObject):
     recv_signal     = pyqtSignal(bytes, str) # (wav_bytes, sender_ip)
     record_done     = pyqtSignal(object, int)# (np.ndarray, sample_rate)
     error_signal    = pyqtSignal(str)
+    extract_done    = pyqtSignal(str)        # (extracted_message)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -66,7 +347,6 @@ class MainWindow(QMainWindow):
         # Defaults (overridden by Settings screen)
         self.peer_ip    = ""
         self.peer_port  = 9999
-        self.rec_dur    = 5
 
         self._connect_bridge()
         self._init_ui()
@@ -77,10 +357,11 @@ class MainWindow(QMainWindow):
         self.bridge.recv_signal.connect(self._on_audio_received)
         self.bridge.record_done.connect(self._on_record_done)
         self.bridge.error_signal.connect(lambda msg: QMessageBox.critical(self, "Error", msg))
+        self.bridge.extract_done.connect(self._show_extracted)
 
     # ── UI init ──────────────────────────────────────────────────────────────
     def _init_ui(self):
-        self.setWindowTitle("CryptoWave — Covert Audio Comm")
+        self.setWindowTitle("Audio Steganography")
         self.setMinimumSize(820, 640)
 
         self.stack = QStackedWidget()
@@ -109,12 +390,12 @@ class MainWindow(QMainWindow):
         lay.setSpacing(0)
 
         # Header
-        title = QLabel("🔒 CryptoWave")
+        title = QLabel("🔒 Audio Steganography")
         title.setObjectName("AppTitle")
         title.setAlignment(Qt.AlignCenter)
         lay.addWidget(title)
 
-        subtitle = QLabel("Covert Communication via Audio Steganography")
+        subtitle = QLabel("Communication via Audio Steganography")
         subtitle.setObjectName("AppSubtitle")
         subtitle.setAlignment(Qt.AlignCenter)
         lay.addWidget(subtitle)
@@ -171,7 +452,7 @@ class MainWindow(QMainWindow):
         back = self._back_btn(self._goto_home)
         top.addWidget(back)
         top.addStretch()
-        heading = QLabel("📤 Send Covert Message")
+        heading = QLabel("📤 Send Message")
         heading.setObjectName("ScreenTitle")
         top.addWidget(heading)
         top.addStretch()
@@ -186,9 +467,9 @@ class MainWindow(QMainWindow):
         self.rec_status_label.setObjectName("InfoLabel")
         row1.addWidget(self.rec_status_label, stretch=1)
 
-        self.rec_btn = QPushButton("🎙 Record Mic")
+        self.rec_btn = QPushButton("🎙 Start Recording")
         self.rec_btn.setObjectName("ActionBtn")
-        self.rec_btn.clicked.connect(self._start_recording)
+        self.rec_btn.clicked.connect(self._toggle_recording)
         row1.addWidget(self.rec_btn)
 
         load_btn = QPushButton("📂 Load WAV")
@@ -269,7 +550,7 @@ class MainWindow(QMainWindow):
         back = self._back_btn(self._goto_home)
         top.addWidget(back)
         top.addStretch()
-        heading = QLabel("📥 Receive Covert Message")
+        heading = QLabel("📥 Receive Message")
         heading.setObjectName("ScreenTitle")
         top.addWidget(heading)
         top.addStretch()
@@ -384,16 +665,6 @@ class MainWindow(QMainWindow):
         r2.addStretch()
         inner.addLayout(r2)
 
-        # Recording duration
-        r3 = QHBoxLayout()
-        r3.addWidget(QLabel("Recording Duration (sec):"))
-        self.def_rec_spin = QSpinBox()
-        self.def_rec_spin.setRange(2, 60)
-        self.def_rec_spin.setValue(5)
-        r3.addWidget(self.def_rec_spin)
-        r3.addStretch()
-        inner.addLayout(r3)
-
         lay.addWidget(frame)
 
         save_btn = QPushButton("✔  Save Settings")
@@ -446,54 +717,54 @@ class MainWindow(QMainWindow):
     def _save_settings(self):
         self.peer_ip   = self.def_ip_input.text().strip()
         self.peer_port = self.def_port_spin.value()
-        self.rec_dur   = self.def_rec_spin.value()
         QMessageBox.information(self, "Settings Saved",
-                                f"Default peer: {self.peer_ip}:{self.peer_port}\n"
-                                f"Recording: {self.rec_dur}s")
+                                f"Default peer: {self.peer_ip}:{self.peer_port}")
 
     # ═════════════════════════════════════════════════════════════════════════
     # Recording
     # ═════════════════════════════════════════════════════════════════════════
 
+    def _toggle_recording(self):
+        if getattr(self, "is_recording", False):
+            self._stop_recording()
+        else:
+            self._start_recording()
+
     def _start_recording(self):
-        dur = self.rec_dur
-        self.rec_btn.setEnabled(False)
-        self.rec_btn.setText(f"🎙 Recording {dur}s…")
+        self.is_recording = True
+        self.rec_btn.setText("⏹ Stop Recording")
+        self.rec_btn.setStyleSheet("background-color: #6e1f1f;")
         self.rec_progress.setVisible(True)
-        self.rec_progress.setValue(0)
+        self.rec_progress.setRange(0, 0)
         self.recorded_samples = None
         self.play_send_btn.setEnabled(False)
+        self.rec_status_label.setText("Recording... (Click Stop when done)")
 
-        # Animate progress bar over the recording duration
-        self._rec_start = time.time()
-        self._rec_duration = dur
-        self._rec_timer = QTimer()
-        self._rec_timer.timeout.connect(self._update_rec_progress)
-        self._rec_timer.start(100)
-
-        AsyncRecorder(
-            duration_sec=dur,
+        self.recorder = AsyncRecorder(
             on_done=lambda s, sr: self.bridge.record_done.emit(s, sr),
             on_error=lambda e: self.bridge.error_signal.emit(f"Recording error: {e}"),
             sample_rate=44100
-        ).start()
+        )
+        self.recorder.start()
 
-    def _update_rec_progress(self):
-        elapsed = time.time() - self._rec_start
-        pct = int(min(elapsed / self._rec_duration * 100, 99))
-        self.rec_progress.setValue(pct)
+    def _stop_recording(self):
+        if hasattr(self, "recorder") and self.recorder:
+            self.recorder.stop()
+            self.recorder = None
+        self.is_recording = False
+        self.rec_btn.setText("🎙 Start Recording")
+        self.rec_btn.setStyleSheet("")
+        self.rec_progress.setRange(0, 100)
+        self.rec_progress.setValue(100)
 
     def _on_record_done(self, samples, sr):
-        self._rec_timer.stop()
         self.rec_progress.setValue(100)
         self.recorded_samples = samples
         self.recorded_sr = sr
-        self.loaded_audio_path = None   # clear file-based source
+        self.loaded_audio_path = None
 
         duration = len(samples) / sr
         self.rec_status_label.setText(f"✔  Recorded {duration:.1f}s  ({sr} Hz, mono)")
-        self.rec_btn.setEnabled(True)
-        self.rec_btn.setText("🎙 Record Mic")
         self.play_send_btn.setEnabled(True)
         self._log_send(f"Recording complete: {duration:.1f}s at {sr} Hz")
 
@@ -651,7 +922,7 @@ class MainWindow(QMainWindow):
     def _extract_worker(self, arr):
         try:
             msg = self.stego.extract_array(arr)
-            QTimer.singleShot(0, lambda: self._show_extracted(msg))
+            self.bridge.extract_done.emit(msg)
         except Exception as e:
             self.bridge.log_signal.emit(f"Extraction error: {e}", "error")
 
@@ -757,3 +1028,9 @@ class MainWindow(QMainWindow):
         self._stop_listener()
         self.player.stop()
         event.accept()
+
+    def resizeEvent(self, event):
+        # Update stylesheet on resize to scale fonts
+        size = event.size()
+        self.setStyleSheet(get_style(size.width(), size.height()))
+        super().resizeEvent(event)
