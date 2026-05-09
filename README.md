@@ -1,4 +1,4 @@
-# 🔒 CryptoWave — Covert Audio Steganography Communication System
+#  CryptoWave — Covert Audio Steganography Communication System
 
 A real-time **covert communication platform** that hides secret text messages inside audio files and transmits them between devices over a local Wi-Fi network. The audio sounds completely normal to anyone listening — the hidden message is invisible and inaudible.
 
@@ -6,14 +6,14 @@ Built with a custom **Cooley-Tukey FFT** implementation and **QIM (Quantization 
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🎙 **Live Microphone Recording** — capture audio directly from your laptop mic
-- 🔐 **FFT + QIM Steganography** — hide text inside frequency-domain magnitudes (inaudible)
-- 📡 **Real-time LAN Transfer** — send stego audio to another device over TCP/IP (Wi-Fi)
-- 📥 **Auto-receive & Extract** — receiver automatically detects and decodes the hidden message
-- ↩ **Bidirectional Chat** — both devices can send and reply (covert walkie-talkie)
-- 🎨 **Premium Dark UI** — 4-screen PyQt5 interface with activity logs and playback
+-  **Live Microphone Recording** — capture audio directly from your laptop mic
+-  **FFT + QIM Steganography** — hide text inside frequency-domain magnitudes (inaudible)
+-  **Real-time LAN Transfer** — send stego audio to another device over TCP/IP (Wi-Fi)
+-  **Auto-receive & Extract** — receiver automatically detects and decodes the hidden message
+-  **Bidirectional Chat** — both devices can send and reply (covert walkie-talkie)
+-  **Premium Dark UI** — 4-screen PyQt5 interface with activity logs and playback
 
 ---
 
@@ -35,7 +35,7 @@ Both sides look like they are exchanging audio clips — but each clip carries a
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 audiosteg/
@@ -52,13 +52,13 @@ audiosteg/
 
 ---
 
-## ⚙ Installation
+##  Installation
 
 **Requirements**: Python 3.10+
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/YourName/Audio-Steganography.git
+git clone https://github.com/shrawan077/Audio-Steganography.git
 cd Audio-Steganography
 
 # 2. Create a virtual environment
@@ -77,29 +77,29 @@ python main.py
 
 ---
 
-## 🚀 Usage — Two Laptops on the Same Wi-Fi
+##  Usage — Two Laptops on the Same Wi-Fi
 
 ### Device B (Receiver) — do this first
 1. Run `python main.py`
-2. Click **"📥 Receive Message"**
+2. Click **" Receive Message"**
 3. Note the IP address shown (e.g. `192.168.1.10`) — share it with the sender
-4. Click **"▶ Start Listening"** — the app is now waiting for incoming audio
+4. Click **" Start Listening"** — the app is now waiting for incoming audio
 
 ### Device A (Sender)
 1. Run `python main.py`
-2. Click **"📤 Send Message"**
-3. Click **"🎙 Record Mic"** — speak for 5 seconds
+2. Click **"Send Message"**
+3. Click **"Record Mic"** — speak for 5 seconds
 4. Type your secret message in the text box
 5. Enter Device B's IP address
-6. Click **"🚀 Embed & Send"**
+6. Click **"Embed & Send"**
 
 Device B will automatically receive the audio, play it (sounds normal), and display the extracted hidden message. Click **"↩ Reply"** to send a message back.
 
-> 💡 **Tip**: Use your phone as a mobile hotspot and connect both laptops to it — no college/office network restrictions.
+>  **Tip**: Use your phone as a mobile hotspot and connect both laptops to it — no college/office network restrictions.
 
 ---
 
-## 🧮 Algorithm
+##  Algorithm
 
 ### Embedding
 1. **Text → Bits**: Each character → 8-bit ASCII. Append `###END###` terminator.
