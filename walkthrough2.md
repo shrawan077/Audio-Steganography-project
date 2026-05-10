@@ -1,87 +1,90 @@
 # Audio Steganography: Core Processes
 
-This document provides a visual representation of how the FFT-based audio steganography system embeds and extracts messages.
+This document provides a visual representation of how the FFT-based audio steganography system embeds and extracts messages using a **manual recursive FFT** algorithm.
 
 ## 1. Embedding Process
 
-The embedding process uses **Quantization Index Modulation (QIM)** in the frequency domain.
+The embedding process uses **Quantization Index Modulation (QIM)** in the frequency domain with a custom Cooley-Tukey FFT implementation.
 
 ```mermaid
 graph TD
-    A["Input Audio File"] --> B["Read WAV & Convert to Mono"]
+    A["Audio Source (Mic Stream or WAV)"] --> B["Capture/Read & Convert to Mono"]
     B --> C["Normalize Audio Samples"]
-    D["Secret Message"] --> E["Add Terminator & Convert to Bits"]
-    C --> F["Divide Audio into Frames"]
+    D["Secret Message"] --> E["Convert to UTF-8 Bits & Add Terminator"]
+    C --> F["Divide Audio into 1024-sample Frames"]
     E --> G["Process Each Frame"]
     F --> G
     
-    subgraph "Per Frame Processing"
-        G --> H["Fast Fourier Transform (FFT)"]
+    subgraph "Per Frame Processing (Manual FFT)"
+        G --> H["Manual Recursive FFT"]
         H --> I["Get Magnitudes & Phases"]
         I --> J["Modify Magnitudes using QIM"]
         J --> K["Symmetric Update for Real FFT"]
-        K --> L["Inverse FFT (IFFT)"]
+        K --> L["Manual Inverse FFT (IFFT)"]
     end
     
     L --> M["Reconstruct Stego Audio"]
-    M --> N["Clip & Convert to 16-bit PCM"]
-    N --> O["Save Stego WAV File"]
+    M --> N["Convert to 16-bit PCM (WAV bytes)"]
+    N --> O["Transmit via TCP over LAN"]
 ```
 
 ---
 
 ## 2. Extraction Process
 
-The extraction process reverses the quantization to retrieve the bitstream.
+The extraction process reverses the quantization to retrieve the bitstream from incoming network packets.
 
 ```mermaid
 graph TD
-    A["Stego Audio File"] --> B["Read WAV & Convert to Mono"]
-    B --> C["Divide Audio into Frames"]
+    A["Incoming TCP Packets (WAV bytes)"] --> B["Reconstruct Signal & Normalize"]
+    B --> C["Divide Audio into 1024-sample Frames"]
     C --> D["Process Each Frame"]
     
-    subgraph "Per Frame Extraction"
-        D --> E["Fast Fourier Transform (FFT)"]
+    subgraph "Per Frame Extraction (Manual FFT)"
+        D --> E["Manual Recursive FFT"]
         E --> F["Get Magnitudes"]
-        F --> G["Check Bin Magnitudes"]
-        G --> H["Quantize Magnitude / Step"]
+        F --> G["Check Bin Magnitudes (100-300Hz)"]
+        G --> H["Quantize Magnitude / Step (0.1)"]
         H --> I["Extract Bit: Q % 2"]
     end
     
     I --> J["Append Bits to Buffer"]
-    J --> K["Convert Bits to Text"]
-    K --> L{"Terminator Found?"}
-    L -- "Yes" --> M["Stop & Return Message"]
+    J --> K["Convert Bits to UTF-8 Text"]
+    K --> L{"###END### Found?"}
+    L -- "Yes" --> M["Stop & Show Message"]
     L -- "No" --> D
     
-    M --> N["Final Secret Message"]
+    M --> N["Final Decoded Message"]
 ```
 
 ## Presentation Slides (Concise Versions)
 
-These simplified diagrams are designed for presentation slides to highlight the core high-level logic.
+These simplified diagrams highlight the core high-level logic for presentations.
 
 ### Embedding (Simplified)
 ```mermaid
 graph LR
-    Msg["Secret Message"] --> Bits["Bitstream"]
-    Audio["Cover Audio"] --> FFT["FFT (Frequency)"]
+    Msg["Secret Message"] --> Bits["UTF-8 Bitstream"]
+    Audio["Mic Recording"] --> FFT["Manual FFT"]
     Bits --> QIM["QIM Embedding"]
     FFT --> QIM
-    QIM --> IFFT["Inverse FFT"]
-    IFFT --> Stego["Stego Audio"]
+    QIM --> IFFT["Manual IFFT"]
+    IFFT --> TCP["TCP Transmission"]
 ```
 
 ### Extraction (Simplified)
 ```mermaid
 graph LR
-    Stego["Stego Audio"] --> FFT["FFT (Frequency)"]
+    TCP["TCP Signal"] --> FFT["Manual FFT"]
     FFT --> QIM["QIM Detection"]
-    QIM --> Bits["Bitstream"]
+    QIM --> Bits["UTF-8 Bits"]
     Bits --> Msg["Secret Message"]
 ```
 
 ## Key Technologies
-- **FFT (Fast Fourier Transform):** Transitions audio from time domain to frequency domain.
+- **Manual FFT:** A Cooley-Tukey radix-2 implementation built from scratch in Python.
+- **Start/Stop Recording:** Continuous audio streaming for flexible message embedding.
 - **QIM (Quantization Index Modulation):** Encodes bits by forcing frequency magnitudes to even or odd multiples of a quantization step.
-- **Complexity:** Minimal audible distortion by targeting mid-range frequencies.
+- **UTF-8 Encoding:** Robust character support including emojis and special symbols.
+- **Responsive UI:** Dynamic font scaling that adjusts automatically to full-screen mode.
+- **P2P Networking:** Direct TCP/IP communication between devices on the same Wi-Fi.

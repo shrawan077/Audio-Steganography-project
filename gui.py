@@ -523,7 +523,7 @@ class MainWindow(QMainWindow):
         lay.addWidget(dest_frame)
 
         # ── Send button ─────────────────────────────────────────────────
-        self.send_btn = QPushButton("🚀  Embed & Send")
+        self.send_btn = QPushButton("Embed and Send")
         self.send_btn.setObjectName("BigActionBtn")
         self.send_btn.clicked.connect(self._do_embed_and_send)
         lay.addWidget(self.send_btn)
@@ -847,7 +847,7 @@ class MainWindow(QMainWindow):
 
     def _reset_send_btn(self):
         self.send_btn.setEnabled(True)
-        self.send_btn.setText("🚀  Embed & Send")
+        self.send_btn.setText("Embed and Send")
 
     # ═════════════════════════════════════════════════════════════════════════
     # Listener
